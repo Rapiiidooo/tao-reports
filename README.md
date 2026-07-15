@@ -7,11 +7,10 @@ straight from mainnet and pinned to a block, so anyone can re-run it and check.
 
 ## Reports
 
-| Report                    | What it covers                                                                                                   | Snapshot         |
-|---------------------------|------------------------------------------------------------------------------------------------------------------|------------------|
-| [Multisig](./2026-07-14-multi-sig.md) | Every multisig coldkey on the network: signer schemes (M-of-N), holdings, and which ones own or validate subnets | block ~8,616,000 |
-
-More to come: validators, subnet flows, staking yield, whale moves.
+| Report                                  | What it covers                                                                                                   | Snapshot         |
+|-----------------------------------------|------------------------------------------------------------------------------------------------------------------|------------------|
+| [Multisig](./2026-07-14-multi-sig.md)   | Every multisig coldkey on the network: signer schemes (M-of-N), holdings, and which ones own or validate subnets | block ~8,616,000 |
+| [Proxies](./2026-07-14-proxy-report.md) | The live delegation graph of the `Proxy` pallet: who may act for whom, proxy types, exfiltration-capable grants  | block ~8,616,000 |
 
 ## How the numbers are made
 
