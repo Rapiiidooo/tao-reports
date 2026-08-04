@@ -320,11 +320,12 @@ removes ~0.4 to 0.7 TB/year of trie history (section 4).
 
 ## 6. Recommendations, ranked by reclaimed bytes
 
-1. **Tame the emission bookkeeping.** Two levels. Muting or aggregating the events (one per claim
-   instead of ~38) saves **~52 GB/year of payload**. Consolidating the money flow itself (fewer
-   hops through pallet accounts, batched per-claim balance writes) also cuts the ~2.2M account
-   writes/day, worth on the order of **0.4 to 0.7 TB/year of archive trie history** on top.
-   Subtensor already trimmed per-account emission events once for the same reason.
+1. **Tame the emission bookkeeping.** Two levels, neither changes anything user-visible. Muting or
+   aggregating the events (one per claim instead of ~38) saves **~52 GB/year of payload**. Summing
+   each claim internally and paying it with **one final transfer instead of ~38 pallet-account
+   hops** also cuts the ~2.2M account writes/day, worth on the order of **0.4 to 0.7 TB/year of
+   archive trie history** on top. Subtensor already trimmed per-account emission events once for
+   the same reason.
 2. **Extend pool guards to the two failure factories (~5 GB/year).** `AccountNotAllowedCommit` is
    checkable at validation; give commits a `provides` tag per (hotkey, netuid, rate-window) so
    window duplicates fight in the pool instead of landing. Together: ~89% of the month's 875,742
@@ -364,8 +365,16 @@ root-claim hook processes ~5 claims every single block, touching hundreds of key
 balances, watermarks) whose trie paths are kept forever; by timing, that one design choice owns
 the 3.2 → 8.7 GB/day step, ~63% of today's growth. The event firehose (section 4) and the failed
 extrinsics (section 1) are the visible junk, but they are payload: ~250 MB/day all included, under
-3% of the bill. Shrinking the bill means fewer **writes per block** (batched or on-demand claims,
-consolidated transfers), not just fewer bytes per write.
+3% of the bill.
+
+What is realistic about it. Not touching the auto-claim design (that is the product) and not
+touching how archives store state (that is Substrate). The one realistic runtime change: a claim
+currently makes ~38 separate internal transfers, one per basket holding, each bouncing through a
+subnet pallet account at ~2 account writes a hop; summing internally and making **one final
+transfer per claim** keeps the exact same money and timing for the user while cutting those writes
+~20×. Everything else is operator planning: at 8.71 GB/day an archive needs a 16 TB class volume
+for a 2-year horizon, and any node that does not serve historical queries should simply run pruned
+(a few GB).
 
 ## Appendix: reproduction
 
