@@ -19,7 +19,7 @@ overhead), so every figure is a lower bound.
 - **Commitments are a history problem, not a state problem**: 19.5 MB of state vs 18.8M extrinsics
   (8.9% of everything ever sent), 62% failed, all feeless. Peak day 2026-03-28: **1.30M failed
   `set_commitment`**.
-- **The whole chain state is ~620 MB**: perfect state cleanup reclaims ~70 MB. The payload grows
+- **The whole chain state is ~620 MB**: perfect state cleanup reclaims ~44 MB. The payload grows
   ~**250 MB/day** (~90 GB/year), **~2/3 of it noise**: ~175 MB/day of events (mostly
   `Balances.Transfer`/`Deposit` from the root-claim machinery, ~2.2M/day) + ~14 MB/day of failures.
   The archive itself grows **8.71 GB/day**, and those same 2.2M writes/day are a first-order driver
@@ -220,9 +220,6 @@ V1 maps actually get cleared once it completes, because the pallet has form here
 
 ### Junk found in state
 
-- **Drand pulses: 31.5 MB for a 1-week window** (`MAX_KEPT_PULSES` = 216,000 rounds, ~146 B each).
-  Consumers (timelocked commits, commitment reveals) work in hours, not days: a 1-day window holds
-  4.5 MB, **27 MB reclaimed for one constant**.
 - **86% of the Swap pallet is its dead predecessor.** Twelve V3 AMM items the runtime no longer
   declares: `TickIndexBitmapWords` (1,256 keys), `Ticks` (256), `Positions` (128),
   `AlphaSqrtPrice`, `FeeGlobalTao`, `FeeGlobalAlpha`, `ScrapReservoirTao`, `CurrentLiquidity`,
@@ -238,7 +235,14 @@ V1 maps actually get cleared once it completes, because the pallet has form here
   1.8 MB, only grows.
 - **Rate-limit residue**: `LastTxBlock` and friends keep one entry per account forever.
 
-Headline: **the perfect state cleanup reclaims ~70 MB of a 620 MB state**. State fits in RAM; the
+One suspect cleared: **Drand pulses (31.5 MB) look oversized but are by design.** `MAX_KEPT_PULSES`
+(216,000 rounds, 7.5 days) is pinned to `MAX_TEMPO` (50,400 blocks, exactly 7 days), the longest
+epoch a subnet owner can set: a timelocked weight commit must find its pulse alive through its
+full reveal epoch, retried every block until the epoch passes. Real tempos top out at 6 hours
+today, so ~97% of the window covers a legal maximum nobody uses, but trimming it buys ~30 MB of
+stock, nothing on flow, and couples pulse pruning to live tempos. Left alone.
+
+Headline: **the perfect state cleanup reclaims ~44 MB of a 620 MB state**. State fits in RAM; the
 disk goes elsewhere.
 
 ## 4. Where the disk actually goes: a 4.6 TB archive, of which 135 GB is payload
@@ -299,11 +303,10 @@ One-shot **state** cleanup (a single runtime migration):
 | Target                                                                                                                                                                                                                                        | Mechanism          | Reclaims   |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|------------|
 | 9 dead pre-dTAO `SubtensorModule` items (`TotalHotkeyStake`, `PendingdHotkeyEmission`, `LastHotkeyEmissionDrain`, `TotalColdkeyStake`, `StakeDeltaSinceLastEmissionDrain`, `LastAddStakeIncrease`, `ColdkeyArbitrationBlock`, 2 unidentified) | `kill_prefix`      | 26.8 MB    |
-| `Drand.Pulses` window, 1 week → 1 day (`MAX_KEPT_PULSES` 216,000 → 28,800)                                                                                                                                                                    | one constant       | 27.0 MB    |
 | Commitments idle ≥ 1 year (13,273 entries) + orphaned `LastCommitment`/`UsedSpaceOf` rows + `RevealedCommitments` trimmed to the last reveal                                                                                                  | migration          | ~15 MB     |
 | `UsedWork` (24,125 PoW blobs, zero readers)                                                                                                                                                                                                   | `kill_prefix`      | 1.8 MB     |
 | 12 Swap V3 orphan items                                                                                                                                                                                                                       | `kill_prefix`      | 0.2 MB     |
-| **State total**                                                                                                                                                                                                                               |                    | **~71 MB** |
+| **State total**                                                                                                                                                                                                                               |                    | **~44 MB** |
 | Watchlist: `Alpha` + `TotalHotkeyShares` V1 maps, once the V2 migration cursor completes                                                                                                                                                      | verify, then clear | ~121 MB    |
 
 Ongoing **flow** cleanup (policy changes, valued at the current run rate):
@@ -314,7 +317,7 @@ Ongoing **flow** cleanup (policy changes, valued at the current run rate):
 | Landed failures (feeless commit/commitment spam)                                            | pool-level guards + fees on failed calls  | ~5 GB/year             |
 | **Flow total**                                                                              |                                           | **~57 of ~90 GB/year** |
 
-The asymmetry is the whole report: ~71 MB once, versus ~57 GB **per year**, forever. Both flow
+The asymmetry is the whole report: ~44 MB once, versus ~57 GB **per year**, forever. Both flow
 rows are valued in payload bytes; on an archive, consolidating the transfer fan-out additionally
 removes ~0.4 to 0.7 TB/year of trie history (section 4).
 
@@ -333,7 +336,7 @@ removes ~0.4 to 0.7 TB/year of trie history (section 4).
 3. **Make chronic feeless failure expensive.** Charge the normal fee when a `Pays::No` call fails
    (post-dispatch repricing; the hook exists in `pallet_transaction_payment`). The 100%-fail bots
    exist because failure is free.
-4. **One-shot state migration (~70 MB, cheap).** Everything in the section 5 state table; and once
+4. **One-shot state migration (~44 MB, cheap).** Everything in the section 5 state table; and once
    the `AlphaV2` cursor finishes, verify the V1 maps get cleared (~120 MB at stake).
 5. **Node operators, today**: default state pruning already avoids the ~4.4 TB of historical state
    versions; adding `--blocks-pruning 256` drops the 135 GB of bodies + events too. Only archives
