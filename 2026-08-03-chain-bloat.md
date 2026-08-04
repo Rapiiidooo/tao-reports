@@ -39,7 +39,7 @@ overhead), so every figure is a lower bound.
   `set_weights` were fatter); migration-transient failures of snapshot day
   (`BetaBasketSeedInProgress`) ignored.
 
-## 1. Failed extrinsics: 93.0M of 212.1M, 43.9% of chain history
+## 1. Failed extrinsics: 93.0M of 212.1M ever landed (43.9% by count, 25 to 40 GB by bytes)
 
 ### By era
 
