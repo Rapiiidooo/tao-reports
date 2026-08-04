@@ -10,17 +10,20 @@ overhead), so every figure is a lower bound.
 
 ## TL;DR
 
-- **212.1M extrinsics ever landed, 93.0M failed (43.9%)**: roughly **25 to 40 GB of the ~135 GB**
-  an archive node stores is failure junk.
+- **212.1M extrinsics ever landed, 93.0M failed (43.9%)**: roughly **25 to 40 GB of the ~135 GB
+  of block + event payload** is failure junk. A full archive node is **~4.6 TB**; the other ~97%
+  is historical state versions (section 4).
 - **The worst offenders are feeless**: `burned_register` (28.1M fails, 96.9% failure rate),
   `set_weights` (25.8M), `set_commitment` (11.6M, 61.8%), `serve_axon` (10.9M, 79.6%),
   `serve_prometheus` (4.8M, **99.6%**).
 - **Commitments are a history problem, not a state problem**: 19.5 MB of state vs 18.8M extrinsics
   (8.9% of everything ever sent), 62% failed, all feeless. Peak day 2026-03-28: **1.30M failed
   `set_commitment`**.
-- **The whole chain state is ~620 MB**: perfect state cleanup reclaims ~70 MB. The chain grows
-  ~**250 MB/day** (~90 GB/year) and **~2/3 of that is noise**: ~175 MB/day of events (mostly
+- **The whole chain state is ~620 MB**: perfect state cleanup reclaims ~70 MB. The payload grows
+  ~**250 MB/day** (~90 GB/year), **~2/3 of it noise**: ~175 MB/day of events (mostly
   `Balances.Transfer`/`Deposit` from the root-claim machinery, ~2.2M/day) + ~14 MB/day of failures.
+  The archive itself grows **8.71 GB/day**, and those same 2.2M writes/day are a first-order driver
+  of it through permanent trie history.
 - Failure rate today: **17% over 30 days** (43.9% lifetime), ~29k/day still landing. **90% paid
   zero fees** (the rest paid 100.6 τ). Two rejectable-at-validity classes dominate:
   `CommittingWeightsTooFast` and `AccountNotAllowedCommit`.
@@ -234,12 +237,24 @@ V1 maps actually get cleared once it completes, because the pallet has form here
 Headline: **the perfect state cleanup reclaims ~70 MB of a 620 MB state**. State fits in RAM; the
 disk goes elsewhere.
 
-## 4. Where the disk actually goes: 135 GB of history, and the events firehose
+## 4. Where the disk actually goes: a 4.6 TB archive, of which 135 GB is payload
 
-Measured: **91.8 GB of extrinsic bodies + 42.9 GB of events** (headers and db overhead on top; a
-pruned validator keeps blocks too unless `--blocks-pruning` is set). Extrinsic bytes are flat
-(~70 MB/day), but **events went from a 2023 to 2025 average of ~3 KB/block to 24.3 KB/block**:
-~175 MB/day, 2.5× the extrinsic flow.
+The reality check first. A full finney archive, measured with `du -sb` on three independently
+synced RocksDB nodes the same day: **4.567 / 4.576 / 4.629 TB (mean 4.59 TB)**, growing at
+**8.71 GB/day** (least-squares over 8,446 hourly size samples spanning 389 days, R² = 0.999; the
+rate was ~3.2 GB/day until a step change in November 2025).
+
+The payload measured in this report: **91.8 GB of extrinsic bodies + 42.9 GB of events**. That is
+**~3% of the archive, and ~250 MB/day of its 8.71 GB/day flow, also ~3%**. The other ~97% is
+**historical state versions**: `--pruning=archive` keeps every block's state trie, so every storage
+key written in a block persists its whole trie path (~0.5 to 3 KB of nodes) forever, ~1.2 MB of
+new trie per block at the current write load. Consequence: what drives archive growth is not bytes
+in blocks, it is **how many storage keys each block touches**. The ~2.2M balance writes/day behind
+the `Transfer`/`Deposit` storm below cost on the order of **1 to 2 GB/day of permanent trie
+history**, an order of magnitude above their 140 MB/day of event payload.
+
+Within the payload itself: extrinsic bytes are flat (~70 MB/day), but **events went from a 2023 to
+2025 average of ~3 KB/block to 24.3 KB/block**: ~175 MB/day, 2.5× the extrinsic flow.
 
 One day of events (2026-08-02/03):
 
@@ -295,14 +310,17 @@ Ongoing **flow** cleanup (policy changes, valued at the current run rate):
 | Landed failures (feeless commit/commitment spam)                                            | pool-level guards + fees on failed calls  | ~5 GB/year             |
 | **Flow total**                                                                              |                                           | **~57 of ~90 GB/year** |
 
-The asymmetry is the whole report: ~71 MB once, versus ~57 GB **per year**, forever.
+The asymmetry is the whole report: ~71 MB once, versus ~57 GB **per year**, forever. Both flow
+rows are valued in payload bytes; on an archive, consolidating the transfer fan-out additionally
+removes ~0.4 to 0.7 TB/year of trie history (section 4).
 
 ## 6. Recommendations, ranked by reclaimed bytes
 
-1. **Silence the emission bookkeeping (~52 GB/year).** Move root-claim redemptions and coinbase
-   deposits with event-less balance primitives, or emit one aggregate event per claim instead of
-   ~38. Subtensor already trimmed per-account emission events once for the same reason. This alone
-   roughly **halves chain growth**.
+1. **Tame the emission bookkeeping.** Two levels. Muting or aggregating the events (one per claim
+   instead of ~38) saves **~52 GB/year of payload**. Consolidating the money flow itself (fewer
+   hops through pallet accounts, batched per-claim balance writes) also cuts the ~2.2M account
+   writes/day, worth on the order of **0.4 to 0.7 TB/year of archive trie history** on top.
+   Subtensor already trimmed per-account emission events once for the same reason.
 2. **Extend pool guards to the two failure factories (~5 GB/year).** `AccountNotAllowedCommit` is
    checkable at validation; give commits a `provides` tag per (hotkey, netuid, rate-window) so
    window duplicates fight in the pool instead of landing. Together: ~89% of the month's 875,742
@@ -312,8 +330,9 @@ The asymmetry is the whole report: ~71 MB once, versus ~57 GB **per year**, fore
    exist because failure is free.
 4. **One-shot state migration (~70 MB, cheap).** Everything in the section 5 state table; and once
    the `AlphaV2` cursor finishes, verify the V1 maps get cleared (~120 MB at stake).
-5. **Node operators, today**: a non-archive validator with `--blocks-pruning 256` + state pruning
-   drops nearly all of the 135 GB history. Worth documenting officially.
+5. **Node operators, today**: default state pruning already avoids the ~4.4 TB of historical state
+   versions; adding `--blocks-pruning 256` drops the 135 GB of bodies + events too. Only archives
+   need the full 4.6 TB (growing 8.71 GB/day). Worth documenting officially.
 
 ## Appendix: reproduction
 
@@ -329,6 +348,10 @@ The asymmetry is the whole report: ~71 MB once, versus ~57 GB **per year**, fore
 - Block sweep: `chain_getBlock` (raw bodies) + `state_getStorage(System.Events)` (raw blob) at
   sampled heights; every scan pinned to one explicit endpoint and one block hash. Stratified
   sampling error on the totals (95% CI): extrinsic bodies 91.8 ± 4.4 GB, event blobs 42.9 ± 2.2 GB.
+- Archive totals: `du -sb` on three independently synced RocksDB finney archives, same day
+  (4.567 / 4.576 / 4.629 TB, 1.34% spread); growth from 8,446 hourly `du` samples over 389 days,
+  least-squares 8.71 GB/day, R² = 0.999. Trie amplification (~0.5 to 3 KB per written key) is a
+  structural estimate, not a measurement.
 - Subnets at snapshot: 129 live (`NetworksAdded`), 27 with `SubnetEmissionEnabled = true`.
   `System.Account` walked in full: 553,283 live keys, 56 B values (u64 balances); the chain indexer
   knows 2.32M addresses ever seen, so 4 in 5 hold no state today.
