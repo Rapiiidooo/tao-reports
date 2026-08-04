@@ -62,23 +62,23 @@ block sits a few hours after the Root Reborn migration; a handful of failures th
 Quarterly buckets of 648,000 blocks (~90 days). `GB ext` / `GB ev` are the measured extrinsic and
 event payload per era from the block sweep.
 
-| Era | Dates | Landed | Failed | Fail rate | GB ext | GB ev |
-|----:|-------|-------:|-------:|----------:|-------:|------:|
-| q0 | 2023-03 → 2023-06 | 18,329,790 | 9,307,153 | 50.8% | 10.8 | 1.5 |
-| q1 | 2023-06 → 2023-09 | 4,256,454 | 1,228,891 | 28.9% | 4.4 | 0.3 |
-| q2 | 2023-09 → 2023-12 | 9,955,096 | 4,667,733 | 46.9% | 4.4 | 1.0 |
-| q3 | 2023-12 → 2024-03 | 27,893,226 | 17,439,280 | 62.5% | 7.0 | 3.2 |
-| q4 | 2024-03 → 2024-06 | 19,544,799 | 13,228,570 | **67.7%** | 8.8 | 2.5 |
-| q5 | 2024-06 → 2024-09 | 14,538,895 | 9,607,416 | 66.1% | 6.4 | 2.3 |
-| q6 | 2024-09 → 2024-12 | 11,711,626 | 6,822,100 | 58.3% | 6.4 | 1.3 |
-| q7 | 2024-12 → 2025-03 | 15,869,707 | 8,401,714 | 52.9% | 6.1 | 1.9 |
-| q8 | 2025-03 → 2025-06 | 14,829,186 | 5,426,463 | 36.6% | 6.4 | 2.6 |
-| q9 | 2025-06 → 2025-09 | 13,545,766 | 4,304,424 | 31.8% | 4.8 | 2.4 |
-| q10 | 2025-09 → 2025-12 | 14,925,538 | 2,947,711 | 19.8% | 6.5 | 3.7 |
-| q11 | 2025-12 → 2026-03 | 17,944,748 | 3,379,393 | 18.8% | 7.7 | 4.5 |
-| q12 | 2026-03 → 2026-06 | 20,474,907 | 4,836,832 | 23.6% | 8.5 | 7.4 |
-| q13 | 2026-06 → 2026-08-03 | 8,270,165 | 1,408,941 | 17.0% | 3.4 | 8.3 |
-| | **Total** | **212,089,903** | **93,006,621** | **43.9%** | **91.8** | **42.9** |
+| Era | Dates                |          Landed |         Failed | Fail rate |   GB ext |    GB ev |
+|----:|----------------------|----------------:|---------------:|----------:|---------:|---------:|
+|  q0 | 2023-03 → 2023-06    |      18,329,790 |      9,307,153 |     50.8% |     10.8 |      1.5 |
+|  q1 | 2023-06 → 2023-09    |       4,256,454 |      1,228,891 |     28.9% |      4.4 |      0.3 |
+|  q2 | 2023-09 → 2023-12    |       9,955,096 |      4,667,733 |     46.9% |      4.4 |      1.0 |
+|  q3 | 2023-12 → 2024-03    |      27,893,226 |     17,439,280 |     62.5% |      7.0 |      3.2 |
+|  q4 | 2024-03 → 2024-06    |      19,544,799 |     13,228,570 | **67.7%** |      8.8 |      2.5 |
+|  q5 | 2024-06 → 2024-09    |      14,538,895 |      9,607,416 |     66.1% |      6.4 |      2.3 |
+|  q6 | 2024-09 → 2024-12    |      11,711,626 |      6,822,100 |     58.3% |      6.4 |      1.3 |
+|  q7 | 2024-12 → 2025-03    |      15,869,707 |      8,401,714 |     52.9% |      6.1 |      1.9 |
+|  q8 | 2025-03 → 2025-06    |      14,829,186 |      5,426,463 |     36.6% |      6.4 |      2.6 |
+|  q9 | 2025-06 → 2025-09    |      13,545,766 |      4,304,424 |     31.8% |      4.8 |      2.4 |
+| q10 | 2025-09 → 2025-12    |      14,925,538 |      2,947,711 |     19.8% |      6.5 |      3.7 |
+| q11 | 2025-12 → 2026-03    |      17,944,748 |      3,379,393 |     18.8% |      7.7 |      4.5 |
+| q12 | 2026-03 → 2026-06    |      20,474,907 |      4,836,832 |     23.6% |      8.5 |      7.4 |
+| q13 | 2026-06 → 2026-08-03 |       8,270,165 |      1,408,941 |     17.0% |      3.4 |      8.3 |
+|     | **Total**            | **212,089,903** | **93,006,621** | **43.9%** | **91.8** | **42.9** |
 
 Two reads on this table. First, the failure epidemic peaked in 2024 (the registration-war era, 62 to
 68% of everything failing) and has been squeezed down to 17 to 23% today by pool-level guards
@@ -92,21 +92,21 @@ full quarter of 2023 to 2025. Section 4 explains why.
 Estimated bytes use today's mean size per call (footnote for `set_weights`: the true historical figure
 is higher).
 
-| Call | Fails | Successes | Fail rate | Est. wasted GB |
-|------|------:|----------:|----------:|---------------:|
-| `SubtensorModule.set_weights` | 25,765,857 | 34,514,897 | 42.7% | 9.4 |
-| `SubtensorModule.burned_register` | 28,139,311 | 912,845 | **96.9%** | 4.0 |
-| `Commitments.set_commitment` | 11,634,138 | 7,173,351 | 61.8% | 2.6 |
-| `SubtensorModule.serve_axon` | 10,872,669 | 2,791,977 | 79.6% | 1.5 |
-| `SubtensorModule.commit_timelocked_mechanism_weights` | 1,638,409 | 5,536,893 | 22.8% | 0.9 |
-| `SubtensorModule.commit_timelocked_weights` | 1,335,162 | 4,156,867 | 24.3% | 0.8 |
-| `SubtensorModule.serve_prometheus` | 4,818,646 | 18,041 | **99.6%** | 0.6 |
-| `SubtensorModule.commit_crv3_weights` | 882,679 | 4,707,964 | 15.8% | 0.5 |
-| `SubtensorModule.remove_stake` | 2,655,854 | 5,262,481 | 33.5% | 0.4 |
-| `SubtensorModule.register` (PoW) | 805,513 | 24,132 | 97.1% | 0.2 |
-| `SubtensorModule.register_network` | 655,808 | 209 | **99.97%** | 0.1 |
-| everything else | 3,802,575 | | | ~0.9 |
-| **Total failed** | **93,006,621** | | | **~22 GB** |
+| Call                                                  |          Fails |  Successes |  Fail rate | Est. wasted GB |
+|-------------------------------------------------------|---------------:|-----------:|-----------:|---------------:|
+| `SubtensorModule.set_weights`                         |     25,765,857 | 34,514,897 |      42.7% |            9.4 |
+| `SubtensorModule.burned_register`                     |     28,139,311 |    912,845 |  **96.9%** |            4.0 |
+| `Commitments.set_commitment`                          |     11,634,138 |  7,173,351 |      61.8% |            2.6 |
+| `SubtensorModule.serve_axon`                          |     10,872,669 |  2,791,977 |      79.6% |            1.5 |
+| `SubtensorModule.commit_timelocked_mechanism_weights` |      1,638,409 |  5,536,893 |      22.8% |            0.9 |
+| `SubtensorModule.commit_timelocked_weights`           |      1,335,162 |  4,156,867 |      24.3% |            0.8 |
+| `SubtensorModule.serve_prometheus`                    |      4,818,646 |     18,041 |  **99.6%** |            0.6 |
+| `SubtensorModule.commit_crv3_weights`                 |        882,679 |  4,707,964 |      15.8% |            0.5 |
+| `SubtensorModule.remove_stake`                        |      2,655,854 |  5,262,481 |      33.5% |            0.4 |
+| `SubtensorModule.register` (PoW)                      |        805,513 |     24,132 |      97.1% |            0.2 |
+| `SubtensorModule.register_network`                    |        655,808 |        209 | **99.97%** |            0.1 |
+| everything else                                       |      3,802,575 |            |            |           ~0.9 |
+| **Total failed**                                      | **93,006,621** |            |            |     **~22 GB** |
 
 Add the `System.ExtrinsicFailed` event each failure writes (~110 B): another **~10 GB**. With the
 historical size correction for early fat `set_weights`, the failure footprint lands at **30 to 45 GB
@@ -130,18 +130,18 @@ contributed 100.6 τ, against 1,156.0 τ from successful calls.
 
 Where failures come from now, decoded through the runtime enums:
 
-| Call | Error | Fee paid | Count (30d) |
-|------|-------|----------|------------:|
-| `commit_timelocked_mechanism_weights` | `CommittingWeightsTooFast` | No | 448,600 |
-| `set_commitment` | `AccountNotAllowedCommit` | No | 156,220 |
-| `commit_timelocked_mechanism_weights` | `TooManyUnrevealedCommits` | No | 94,168 |
-| `commit_timelocked_weights` | `TooManyUnrevealedCommits` | No | 54,390 |
-| `System.set_heap_pages` | `BadOrigin` | Yes | 39,374 |
-| `commit_timelocked_mechanism_weights` | `HotKeyNotRegisteredInSubNet` | No | 15,477 |
-| `add_stake_limit` | `Swap.PriceLimitExceeded` | Yes | 12,951 |
-| `set_mechanism_weights` | `WeightVecLengthIsLow` | No | 8,207 |
-| `set_commitment` | `SpaceLimitExceeded` | No | 7,414 |
-| `add_stake_limit` | `SlippageTooHigh` | Yes | 4,455 |
+| Call                                  | Error                         | Fee paid | Count (30d) |
+|---------------------------------------|-------------------------------|----------|------------:|
+| `commit_timelocked_mechanism_weights` | `CommittingWeightsTooFast`    | No       |     448,600 |
+| `set_commitment`                      | `AccountNotAllowedCommit`     | No       |     156,220 |
+| `commit_timelocked_mechanism_weights` | `TooManyUnrevealedCommits`    | No       |      94,168 |
+| `commit_timelocked_weights`           | `TooManyUnrevealedCommits`    | No       |      54,390 |
+| `System.set_heap_pages`               | `BadOrigin`                   | Yes      |      39,374 |
+| `commit_timelocked_mechanism_weights` | `HotKeyNotRegisteredInSubNet` | No       |      15,477 |
+| `add_stake_limit`                     | `Swap.PriceLimitExceeded`     | Yes      |      12,951 |
+| `set_mechanism_weights`               | `WeightVecLengthIsLow`        | No       |       8,207 |
+| `set_commitment`                      | `SpaceLimitExceeded`          | No       |       7,414 |
+| `add_stake_limit`                     | `SlippageTooHigh`             | Yes      |       4,455 |
 
 The fee-paying failures at the bottom are healthy: `PriceLimitExceeded` / `SlippageTooHigh` are user
 protection orders doing their job, and they pay their way. The problem is the top: **the two biggest
@@ -184,15 +184,15 @@ the last 10 reveals per key.
 
 ### State: the entire pallet is 19.5 MB
 
-| Storage | Keys | Bytes (keys + values) |
-|---------|-----:|----------------------:|
-| `CommitmentOf` | 28,775 | 4.95 MB (2.82 values + 2.13 keys) |
-| `RevealedCommitments` | 16,482 | 7.61 MB (6.39 values) |
-| `LastCommitment` | 44,903 | 3.50 MB (mostly keys) |
-| `UsedSpaceOf` | 37,137 | 3.34 MB |
-| `LastBondsReset` | 735 | 0.05 MB |
-| `TimelockedIndex` | 1 | 375 B |
-| **Total** | | **≈ 19.5 MB** |
+| Storage               |   Keys |             Bytes (keys + values) |
+|-----------------------|-------:|----------------------------------:|
+| `CommitmentOf`        | 28,775 | 4.95 MB (2.82 values + 2.13 keys) |
+| `RevealedCommitments` | 16,482 |             7.61 MB (6.39 values) |
+| `LastCommitment`      | 44,903 |             3.50 MB (mostly keys) |
+| `UsedSpaceOf`         | 37,137 |                           3.34 MB |
+| `LastBondsReset`      |    735 |                           0.05 MB |
+| `TimelockedIndex`     |      1 |                             375 B |
+| **Total**             |        |                     **≈ 19.5 MB** |
 
 Structure of the 28,775 live commitments:
 
@@ -226,31 +226,31 @@ failures/month without touching any legitimate miner.
 Whole-chain storage at block 8,766,284, every key counted, sizes per storage item (key bytes + value
 bytes, trie overhead excluded).
 
-| Pallet | Keys | Est. size |
-|--------|-----:|----------:|
-| `SubtensorModule` (202 storage items) | 3,415,632 | 420 MB |
-| `System` (553,283 live accounts, 56 B `AccountInfo` each) | 555,694 | 75 MB |
-| `EVM` + `Ethereum` + `Contracts` (4,971 contracts, 29.5 MB of bytecode, 270,130 storage slots) | 282,604 | 71 MB |
-| `Drand` | 216,004 | 31.5 MB |
-| `Commitments` | 128,033 | 19.5 MB |
-| `Proxy` | 8,630 | 1.0 MB |
-| `Swap` | 3,173 | 0.23 MB |
-| `Multisig`, `Crowdloan`, `MevShield`, `LimitOrders`, `AlphaAssets`, rest | ~900 | ~0.1 MB |
-| **Total** | **~4.6M** | **~620 MB** |
+| Pallet                                                                                         |      Keys |   Est. size |
+|------------------------------------------------------------------------------------------------|----------:|------------:|
+| `SubtensorModule` (202 storage items)                                                          | 3,415,632 |      420 MB |
+| `System` (553,283 live accounts, 56 B `AccountInfo` each)                                      |   555,694 |       75 MB |
+| `EVM` + `Ethereum` + `Contracts` (4,971 contracts, 29.5 MB of bytecode, 270,130 storage slots) |   282,604 |       71 MB |
+| `Drand`                                                                                        |   216,004 |     31.5 MB |
+| `Commitments`                                                                                  |   128,033 |     19.5 MB |
+| `Proxy`                                                                                        |     8,630 |      1.0 MB |
+| `Swap`                                                                                         |     3,173 |     0.23 MB |
+| `Multisig`, `Crowdloan`, `MevShield`, `LimitOrders`, `AlphaAssets`, rest                       |      ~900 |     ~0.1 MB |
+| **Total**                                                                                      | **~4.6M** | **~620 MB** |
 
 The biggest single items, chain-wide:
 
-| Item | Keys | Est. size | What it is |
-|------|-----:|----------:|------------|
-| `SubtensorModule.Alpha` | 755,830 | 110.4 MB | stake shares per (hotkey, coldkey, subnet) |
-| `System.Account` | 553,283 | 75.3 MB | every live account |
-| `SubtensorModule.AlphaV2` | 439,150 | 67.6 MB | `Alpha`'s successor (see below) |
-| `SubtensorModule.LastColdkeyHotkeyStakeBlock` | 453,172 | 54.4 MB | one block number per (coldkey, hotkey) pair that ever staked |
-| `EVM.AccountStorages` | 270,130 | 40.0 MB | contract storage slots |
-| `SubtensorModule.Owner` | 308,263 | 34.5 MB | hotkey → coldkey |
-| `Drand.Pulses` | 216,000 | 31.5 MB | one week of drand rounds |
-| `SubtensorModule.StakingHotkeys` | 140,910 | 29.9 MB | hotkey list per staking coldkey |
-| `SubtensorModule.TotalHotkeyAlphaLastEpoch` | 255,629 | 23.0 MB | per-epoch stake snapshot |
+| Item                                          |    Keys | Est. size | What it is                                                   |
+|-----------------------------------------------|--------:|----------:|--------------------------------------------------------------|
+| `SubtensorModule.Alpha`                       | 755,830 |  110.4 MB | stake shares per (hotkey, coldkey, subnet)                   |
+| `System.Account`                              | 553,283 |   75.3 MB | every live account                                           |
+| `SubtensorModule.AlphaV2`                     | 439,150 |   67.6 MB | `Alpha`'s successor (see below)                              |
+| `SubtensorModule.LastColdkeyHotkeyStakeBlock` | 453,172 |   54.4 MB | one block number per (coldkey, hotkey) pair that ever staked |
+| `EVM.AccountStorages`                         | 270,130 |   40.0 MB | contract storage slots                                       |
+| `SubtensorModule.Owner`                       | 308,263 |   34.5 MB | hotkey → coldkey                                             |
+| `Drand.Pulses`                                | 216,000 |   31.5 MB | one week of drand rounds                                     |
+| `SubtensorModule.StakingHotkeys`              | 140,910 |   29.9 MB | hotkey list per staking coldkey                              |
+| `SubtensorModule.TotalHotkeyAlphaLastEpoch`   | 255,629 |   23.0 MB | per-epoch stake snapshot                                     |
 
 One transitional wart: the runtime currently holds **two generations of the stake maps side by side**,
 `Alpha` (755,830 keys, 110.4 MB) next to `AlphaV2` (439,150 keys, 67.6 MB) and `TotalHotkeyShares`
@@ -303,18 +303,18 @@ but **events went from a 2023 to 2025 average of ~3 KB/block to 24.3 KB/block to
 
 One day of events (2026-08-02/03, counts):
 
-| Event | Count/day |
-|-------|----------:|
-| `Balances.Transfer` | 1,257,892 |
-| `Balances.Deposit` | 916,184 |
-| `System.ExtrinsicSuccess` | 140,607 |
-| `TransactionPayment.TransactionFeePaid` | 115,698 |
-| `Balances.Withdraw` | 49,491 |
-| `SubtensorModule.WeightsSet` | 35,879 |
-| `System.ExtrinsicFailed` | 34,298 |
-| `SubtensorModule.RootClaimed` | 33,579 |
-| `Drand.NewPulse` | 28,881 |
-| `SubtensorModule.TimelockedWeightsCommitted` + `Revealed` | 52,239 |
+| Event                                                     | Count/day |
+|-----------------------------------------------------------|----------:|
+| `Balances.Transfer`                                       | 1,257,892 |
+| `Balances.Deposit`                                        |   916,184 |
+| `System.ExtrinsicSuccess`                                 |   140,607 |
+| `TransactionPayment.TransactionFeePaid`                   |   115,698 |
+| `Balances.Withdraw`                                       |    49,491 |
+| `SubtensorModule.WeightsSet`                              |    35,879 |
+| `System.ExtrinsicFailed`                                  |    34,298 |
+| `SubtensorModule.RootClaimed`                             |    33,579 |
+| `Drand.NewPulse`                                          |    28,881 |
+| `SubtensorModule.TimelockedWeightsCommitted` + `Revealed` |    52,239 |
 
 **~2.2M `Balances.Transfer`/`Deposit` events per day, ~81% of all event bytes.** Anatomy, from block
 inspection: every block runs ~5 hook-driven root claims (`RootClaimed`, no extrinsic behind them),
@@ -330,15 +330,40 @@ every block at 1,192 B (~8.6 MB/day), the price of its per-block key rotation.
 
 ### Current growth budget (last 30 days, measured)
 
-| Flow | MB/day | GB/year | Verdict |
-|------|-------:|--------:|---------|
-| Emission bookkeeping events (`Transfer`/`Deposit`/`Withdraw` from hooks) | ~140 | ~52 | removable: use event-less transfer primitives or one aggregate event per claim |
-| Other events (weights, pulses, tx receipts) | ~35 | ~13 | mostly legitimate |
-| Successful extrinsic bodies | ~58 | ~21 | the actual product |
-| Failed extrinsic bodies + their `ExtrinsicFailed` events | ~16 | ~6 | removable: validity-level rejection + fees |
-| **Total** | **~250** | **~90** | **~2/3 is noise** |
+| Flow                                                                     |   MB/day | GB/year | Verdict                                                                        |
+|--------------------------------------------------------------------------|---------:|--------:|--------------------------------------------------------------------------------|
+| Emission bookkeeping events (`Transfer`/`Deposit`/`Withdraw` from hooks) |     ~140 |     ~52 | removable: use event-less transfer primitives or one aggregate event per claim |
+| Other events (weights, pulses, tx receipts)                              |      ~35 |     ~13 | mostly legitimate                                                              |
+| Successful extrinsic bodies                                              |      ~58 |     ~21 | the actual product                                                             |
+| Failed extrinsic bodies + their `ExtrinsicFailed` events                 |      ~16 |      ~6 | removable: validity-level rejection + fees                                     |
+| **Total**                                                                | **~250** | **~90** | **~2/3 is noise**                                                              |
 
-## 5. Recommendations, ranked by reclaimed bytes
+## 5. The cleanup ledger: everything deletable, in one table
+
+One-shot **state** cleanup (a single runtime migration):
+
+| Target                                                                                                                                               | Mechanism            | Reclaims    |
+|------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|-------------|
+| 9 dead pre-dTAO `SubtensorModule` items (`TotalHotkeyStake`, `PendingdHotkeyEmission`, `LastHotkeyEmissionDrain`, `TotalColdkeyStake`, `StakeDeltaSinceLastEmissionDrain`, `LastAddStakeIncrease`, `ColdkeyArbitrationBlock`, 2 unidentified) | `kill_prefix`        | 26.8 MB     |
+| `Drand.Pulses` window, 1 week → 1 day (`MAX_KEPT_PULSES` 216,000 → 28,800)                                                                           | one constant         | 27.0 MB     |
+| Commitments idle ≥ 1 year (13,273 entries) + orphaned `LastCommitment`/`UsedSpaceOf` rows + `RevealedCommitments` trimmed to the last reveal          | migration            | ~15 MB      |
+| `UsedWork` (24,125 PoW blobs, zero readers)                                                                                                          | `kill_prefix`        | 1.8 MB      |
+| 12 Swap V3 orphan items                                                                                                                              | `kill_prefix`        | 0.2 MB      |
+| **State total**                                                                                                                                      |                      | **~71 MB**  |
+| Watchlist: `Alpha` + `TotalHotkeyShares` V1 maps, once the V2 migration cursor completes                                                             | verify, then clear   | ~121 MB     |
+
+Ongoing **flow** cleanup (policy changes, valued at the current run rate):
+
+| Target                                                                                                    | Mechanism                                  | Avoids           |
+|-----------------------------------------------------------------------------------------------------------|--------------------------------------------|------------------|
+| Emission bookkeeping events (root-claim `Transfer` fan-out, per-subnet coinbase `Deposit`s)                | event-less transfers or 1 event per claim  | ~52 GB/year      |
+| Landed failures (feeless commit/commitment spam)                                                          | pool-level guards + fees on failed calls   | ~6 GB/year       |
+| **Flow total**                                                                                            |                                            | **~58 of ~90 GB/year** |
+
+The asymmetry is the whole report: the one-shot prize is ~71 MB, the policy prize is ~58 GB **per
+year**, forever.
+
+## 6. Recommendations, ranked by reclaimed bytes
 
 1. **Silence the emission bookkeeping (~52 GB/year).** Root-claim basket redemptions and coinbase
    deposits should move funds with the event-less balance primitives (or emit one aggregated event
