@@ -43,9 +43,12 @@ overhead), so every figure is a lower bound.
 
 ### By era
 
-Quarterly buckets of 648,000 blocks. `GB ext` / `GB ev` = measured extrinsic and event payload.
+Quarterly buckets of 648,000 blocks. `Total landed` counts everything included in blocks, successes
+and failures alike; `Failed` is the subset that failed. `GB ext` / `GB ev` are the era's **whole**
+measured payload (all extrinsics, all events), showing where history grew; the failed share of
+those bytes is derived after the next table.
 
-| Era | Dates                |          Landed |         Failed | Fail rate |   GB ext |    GB ev |
+| Era | Dates                |    Total landed |         Failed | Fail rate |   GB ext |    GB ev |
 |----:|----------------------|----------------:|---------------:|----------:|---------:|---------:|
 |  q0 | 2023-03 → 2023-06    |      18,329,790 |      9,307,153 |     50.8% |     10.8 |      1.5 |
 |  q1 | 2023-06 → 2023-09    |       4,256,454 |      1,228,891 |     28.9% |      4.4 |      0.3 |
