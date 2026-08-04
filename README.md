@@ -11,6 +11,7 @@ straight from mainnet and pinned to a block, so anyone can re-run it and check.
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------|------------------|
 | [Multisig](./2026-07-14-multi-sig.md)   | Every multisig coldkey on the network: signer schemes (M-of-N), holdings, and which ones own or validate subnets | block ~8,616,000 |
 | [Proxies](./2026-07-14-proxy-report.md) | The live delegation graph of the `Proxy` pallet: who may act for whom, proxy types, exfiltration-capable grants  | block ~8,616,000 |
+| [Chain bloat](./2026-08-03-chain-bloat.md) | Failed extrinsics (93M of 212M ever landed), the Commitments pallet, a full state census, and what a cleanup would actually reclaim | block ~8,766,000 |
 
 ## How the numbers are made
 
