@@ -27,6 +27,10 @@ overhead), so every figure is a lower bound.
 - Failure rate today: **17% over 30 days** (43.9% lifetime), ~29k/day still landing. **90% paid
   zero fees** (the rest paid 100.6 τ). Two rejectable-at-validity classes dominate:
   `CommittingWeightsTooFast` and `AccountNotAllowedCommit`.
+- **Root cause of the 8.71 GB/day**: per-block emission bookkeeping written into permanent trie
+  history. The root-claim hook (live 2025-11-04, v3.2.10-334) stepped archive growth from 3.2 to
+  8.7 GB/day overnight; the v3.4.0 transfer-based redemption (2026-05-27) added the event firehose
+  on top. Dated proof in section 7.
 
 ## How the numbers are made
 
@@ -242,7 +246,7 @@ disk goes elsewhere.
 The reality check first. A full finney archive, measured with `du -sb` on three independently
 synced RocksDB nodes the same day: **4.567 / 4.576 / 4.629 TB (mean 4.59 TB)**, growing at
 **8.71 GB/day** (least-squares over 8,446 hourly size samples spanning 389 days, R² = 0.999; the
-rate was ~3.2 GB/day until a step change in November 2025).
+rate was ~3.2 GB/day until 2025-11-04, and section 7 pins what changed that day).
 
 The payload measured in this report: **91.8 GB of extrinsic bodies + 42.9 GB of events**. That is
 **~3% of the archive, and ~250 MB/day of its 8.71 GB/day flow, also ~3%**. The other ~97% is
@@ -333,6 +337,35 @@ removes ~0.4 to 0.7 TB/year of trie history (section 4).
 5. **Node operators, today**: default state pruning already avoids the ~4.4 TB of historical state
    versions; adding `--blocks-pruning 256` drops the 135 GB of bodies + events too. Only archives
    need the full 4.6 TB (growing 8.71 GB/day). Worth documenting officially.
+
+## 7. The total bill, and the root cause
+
+Where the 8.71 GB/day of archive growth actually goes:
+
+| Component                                                                   | GB/day | Share | Evidence                      |
+|-----------------------------------------------------------------------------|-------:|------:|-------------------------------|
+| Historical state trie versions (every key written in a block, kept forever) |  ~8.46 |  ~97% | difference; ~1.2 MB per block |
+| Event blob values                                                           |  0.175 |  2.0% | measured                      |
+| Extrinsic bodies                                                            |  0.071 |  0.8% | measured                      |
+| Headers, justifications                                                     | ~0.002 |   ~0% | computed                      |
+
+The causal timeline, every step dated from chain data:
+
+| Date                 | Runtime                 | What turned on                                                                                   | Effect                                                                                     |
+|----------------------|-------------------------|--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| until 2025-11-04     |                         | classic emission + epoch bookkeeping                                                             | archive grows ~3.2 GB/day                                                                  |
+| 2025-11-04 22:27 UTC | v3.2.10-334             | per-block root-claim hook (first `RootClaimed` at block 6,811,692; ~37k claims/day from day one) | growth steps to ~8.3 GB/day overnight: silent state writes, almost no events               |
+| 2026-05-27 → 06-01   | v3.4.0-411 / v3.4.1-413 | claim redemption starts moving TAO with real `Currency::transfer` through pallet accounts        | `Transfer` events jump 9k → 1.47M/day: the q12/q13 event payload explosion (~+140 MB/day) |
+| since                |                         | flat                                                                                             | 8.71 GB/day, R² = 0.999                                                                    |
+
+The root cause in one sentence: **an archive node prices storage writes, not user activity, and
+since 2025-11-04 the chain spends most of its write budget on emission bookkeeping**. The
+root-claim hook processes ~5 claims every single block, touching hundreds of keys (basket rows,
+balances, watermarks) whose trie paths are kept forever; by timing, that one design choice owns
+the 3.2 → 8.7 GB/day step, ~63% of today's growth. The event firehose (section 4) and the failed
+extrinsics (section 1) are the visible junk, but they are payload: ~250 MB/day all included, under
+3% of the bill. Shrinking the bill means fewer **writes per block** (batched or on-demand claims,
+consolidated transfers), not just fewer bytes per write.
 
 ## Appendix: reproduction
 
